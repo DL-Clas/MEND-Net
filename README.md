@@ -6,7 +6,7 @@
 **A Hierarchical Knowledge Distillation and Neural Architecture Search Framework for Lightweight Multimodal Medical Diagnosis on Edge Devices**
 
 ## Overview
-
+![Framework Diagram of BTNet-TS](data/arc.png)
 Traditional multimodal medical diagnosis models rely on large network architectures, leading to high computational complexity that prevents deployment on resource-constrained edge devices. Moreover, these models often fail when encountering modality missing in real-world clinical environments.
 
 **HEAL-Net** addresses these challenges with three core innovations:
