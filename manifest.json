@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "model": "HEAL-Net",
+  "description": "Hierarchical Knowledge Distillation and Neural Architecture Search Framework for Lightweight Multimodal Medical Diagnosis on Edge Devices",
+  "task_type": "multimodal_classification",
+  "num_classes": 5,
+  "class_names": [
+    "Normal",
+    "Cardiac_Hypertrophy",
+    "Pulmonary_Edema",
+    "Pulmonary_Consolidation",
+    "Pleural_Effusion"
+  ],
+  "innovations": [
+    {
+      "name": "HD-NAS",
+      "full_name": "Hardware-aware Differentiable Neural Architecture Search",
+      "type": "T2",
+      "module_class": "DifferentiableSearchSpace",
+      "source_file": "models/hd_nas.py",
+      "expected_behavior": "Constructs continuous heterogeneous search space with hardware penalty term to evolve optimal multimodal fusion topology",
+      "input_shapes": {"x": "BxCxHxW"},
+      "output_shapes": {"searched": "Bx32xHxW"},
+      "formula_refs": ["Eq.1-2 (continuous relaxation)", "Eq.3-6 (hardware-aware loss)"],
+      "disabled_by": {"mechanism": "build_model(config, disabled_modules=['HD-NAS'])", "note": "Replaces search space with static conv"}
+    },
+    {
+      "name": "HKD",
+      "full_name": "Hierarchical Knowledge Distillation with Cross-modal Relation Alignment",
+      "type": "T1",
+      "module_class": "HKDModule",
+      "source_file": "models/hkd_module.py",
+      "expected_behavior": "Aligns teacher-student cross-modal covariance matrices via Frobenius norm + KL divergence distillation",
+      "input_shapes": {
+        "teacher_img": "BxD_T",
+        "teacher_ehr": "BxD_T",
+        "student_img": "BxD_S",
+        "student_ehr": "BxD_S"
+      },
+      "output_shapes": {"loss": "scalar"},
+      "formula_refs": ["Eq.9-10 (projection)", "Eq.11 (covariance)", "Eq.12-14 (distillation loss)"],
+      "disabled_by": {"mechanism": "build_model(config, disabled_modules=['HKD'])", "note": "Uses only CE loss without relation/KL alignment"}
+    },
+    {
+      "name": "DFC",
+      "full_name": "Dynamic Feature Compensation",
+      "type": "T2",
+      "module_class": "DynamicFeatureCompensation",
+      "source_file": "models/dfc.py",
+      "expected_behavior": "Handles modality missing via SNR-based masking, cross-modal generation, and adaptive gating fusion",
+      "input_shapes": {
+        "img_feat": "BxD_img",
+        "ehr_feat": "BxD_ehr"
+      },
+      "output_shapes": {
+        "comp_img": "BxD_img",
+        "comp_ehr": "BxD_ehr"
+      },
+      "formula_refs": ["Eq.15-16 (SNR mask)", "Eq.17-18 (generation)", "Eq.19 (reconstruction)", "Eq.20-21 (gating)"],
+      "disabled_by": {"mechanism": "build_model(config, disabled_modules=['DFC'])", "note": "Bypasses DFC, uses raw features directly"}
+    }
+  ],
+  "teacher_model": {
+    "name": "TeacherModel",
+    "architecture": "ViT-B/32 + TabNet-style EHR encoder + Cross-modal Fusion",
+    "approx_params_m": 86,
+    "note": "Dominant cost is the ViT-B/32 image encoder (~86M). The full-scale 312M budget described in the paper (TabNet ~51M + fusion ~175M) is reproduced with lightweight MLP components; see models/teacher_model.py.",
+    "source_file": "models/teacher_model.py"
+  },
+  "loss_config": {
+    "joint_loss": "L_Total = L_Distill + lambda * log(FLOPs(alpha)) + rho * L_Recon",
+    "log_format": "[stage] Epoch [{epoch}/{total}] Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}",
+    "structured_output": "results/losses_{stage}.json"
+  },
+  "entry_points": {
+    "train": "python run.py --mode train --stage all",
+    "test": "python test.py --model_path ./weights/heal_net_compensate.pth",
+    "ablation": "python run.py --mode ablation --num_seeds 5",
+    "efficiency": "python efficiency_eval.py"
+  }
+}

@@ -1,0 +1,104 @@
+# HEAL-Net Configuration
+# Target: KBS / ESWA / IEEE Trans
+# Task: Multimodal Medical Image Classification (5 classes)
+
+seed: 42
+deterministic: true
+
+# Dataset
+data:
+  dataset_name: "MIMIC"
+  train_dir: "./data/mimic/train"
+  val_dir: "./data/mimic/val"
+  test_dir: "./data/mimic/test"
+  num_classes: 5
+  image_size: 224
+  num_ehr_features: 12
+  pretrained: true
+  class_names:
+    - "Normal"
+    - "Cardiac_Hypertrophy"
+    - "Pulmonary_Edema"
+    - "Pulmonary_Consolidation"
+    - "Pleural_Effusion"
+
+# Teacher Model
+teacher:
+  name: "ViT_B32_TabNet"
+  image_backbone: "vit_b32"
+  ehr_backbone: "tabnet"
+  num_classes: 5
+  pretrained: true
+  checkpoint: "./weights/teacher_pretrained.pth"
+
+# Training
+training:
+  batch_size: 64
+  epochs: 200
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: "AdamW"
+  scheduler: "CosineAnnealing"
+  min_lr: 1e-6
+  early_stopping_patience: 20
+  num_workers: 4
+  amp: true
+  gradient_clip_norm: 1.0
+
+# HD-NAS
+hd_nas:
+  num_nodes: 4
+  search_space:
+    operators:
+      - "sep_conv_3x3"
+      - "sep_conv_5x5"
+      - "dil_conv_3x3"
+      - "avg_pool"
+      - "max_pool"
+      - "skip_connect"
+      - "sparse_attention"
+  lambda_flops: 0.05
+  search_lr: 0.001
+  arch_lr: 0.0003
+  arch_weight_decay: 0.0001
+  arch_min_lr: 1e-6
+  epochs: 50
+  target_flops: 2.5e9
+
+# HKD
+hkd:
+  projection_dim: 128
+  temperature: 3.0
+  gamma: 1.0
+  beta: 0.5
+
+# DFC
+dfc:
+  snr_threshold: 0.3
+  generator_hidden_dim: 128
+  modality_drop_prob: 0.5
+  rho: 0.1
+
+# Experiment
+experiment:
+  num_seeds: 5
+  save_dir: "./weights"
+  log_dir: "./results"
+  log_interval: 10
+
+# Ablation
+ablation:
+  enabled: false
+  innovation_names:
+    - "HD-NAS"
+    - "HKD"
+    - "DFC"
+
+# SOTA baselines for comparison
+sota:
+  accuracy: 87.3
+  f1: 86.1
+  auc: 0.931
+  params_m: 86.4
+  flops_g: 28.1
+  inference_ms: 42.3
