@@ -1,9 +1,9 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=flat-square&logo=pytorch)](https://pytorch.org/)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python)](https://www.python.org/)
 
-# HEAL-Net
+# MEND-Net
 
-**A Hierarchical Knowledge Distillation and Neural Architecture Search Framework for Lightweight Multimodal Medical Diagnosis on Edge Devices**
+**Architecture Search and Cross-Modal Distillation for Self-Repairing Lightweight Multimodal Medical Diagnosis**
 
 ## Overview
 ![Framework Diagram.](data/arc.png)
@@ -13,7 +13,7 @@ Traditional multimodal medical diagnosis models rely on large network architectu
 
 | Module | Full Name | Role |
 |--------|-----------|------|
-| **HD-NAS** | Hardware-aware Differentiable Neural Architecture Search | Evolves optimal lightweight fusion topology with hardware penalty |
+| **EA-NAS** | Hardware-aware Differentiable Neural Architecture Search | Evolves optimal lightweight fusion topology with hardware penalty |
 | **HKD** | Hierarchical Knowledge Distillation | Transfers cross-modal covariance knowledge from teacher to student |
 | **DFC** | Dynamic Feature Compensation | Reconstructs missing modality features via lightweight generator |
 
@@ -173,7 +173,7 @@ python run.py --mode ablation --num_seeds 5 --config configs/config.yaml
 
 This evaluates all combinations:
 
-| Variant | HD-NAS | HKD | DFC | Params (M) | FLOPs (G) | Acc (ideal) | Acc (50% missing) |
+| Variant | EA-NAS | HKD | DFC | Params (M) | FLOPs (G) | Acc (ideal) | Acc (50% missing) |
 |---------|--------|-----|-----|------------|-----------|-------------|-------------------|
 | Base | x | x | x | 18.5 | 5.6 | 84.23 +/- 0.65 | 61.34 +/- 1.12 |
 | V1 | v | x | x | 8.3 | 2.1 | 85.11 +/- 0.58 | 63.52 +/- 0.95 |
@@ -216,11 +216,11 @@ All metrics are mean +/- std over 5 independent random seeds.
 | EHR-KnowGen | 86.4 +/- 0.49 | 85.0 +/- 0.58 | 0.926 | 145.6 | 42.5 | 78.4 |
 | MOFS | 87.2 +/- 0.45 | 85.7 +/- 0.55 | 0.930 | 210.3 | 65.4 | 115.6 |
 | AdaCoMed | 87.3 +/- 0.38 | 86.1 +/- 0.47 | 0.931 | 86.4 | 28.1 | 42.3 |
-| **HEAL-Net** | **89.85 +/- 0.28** | **89.1 +/- 0.33** | **0.948** | **8.8** | **2.2** | **4.8** |
+| **MEND-Net** | **89.85 +/- 0.28** | **89.1 +/- 0.33** | **0.948** | **8.8** | **2.2** | **4.8** |
 
 ### Robustness Under Modality Missing
 
-| Missing Rate | MDF-Net | HyperFusion | EHR-KnowGen | MOFS | AdaCoMed | **HEAL-Net** |
+| Missing Rate | MDF-Net | HyperFusion | EHR-KnowGen | MOFS | AdaCoMed | **MEND-Net** |
 |--------------|---------|-------------|-------------|------|----------|--------------|
 | 0% | 81.8 | 85.6 | 86.4 | 87.2 | 87.3 | **89.85** |
 | 10% | 81.24 | 85.16 | 86.02 | 86.85 | 86.94 | **89.12** |
@@ -234,7 +234,7 @@ All metrics are mean +/- std over 5 independent random seeds.
 ## Project Structure
 
 ```
-HEAL-Net/
+MEND-Net/
 +-- README.md                          # This file
 +-- requirements.txt                   # Python dependencies
 +-- run.py                             # Unified entry (train/test/ablation)
@@ -297,10 +297,10 @@ HEAL-Net/
 If you use this code, please cite:
 
 ```bibtex
-@article{healnet2025,
-  title={HEAL-Net: A Hierarchical Knowledge Distillation and Neural Architecture Search Framework for Lightweight Multimodal Medical Diagnosis on Edge Devices},
+@article{mendnet2026,
+  title={Architecture Search and Cross-Modal Distillation for Self-Repairing Lightweight Multimodal Medical Diagnosis},
   author={},
-  year={2025}
+  year={2026}
 }
 ```
 
