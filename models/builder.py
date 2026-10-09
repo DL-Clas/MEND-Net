@@ -1,27 +1,27 @@
-from .heal_net import HEALNet
+from .mend_net import MENDNet
 from .teacher_model import TeacherModel
 
 
-def build_model(config: dict, disabled_modules: list = None) -> HEALNet:
-    """Build HEAL-Net model from configuration.
+def build_model(config: dict, disabled_modules: list = None) -> MENDNet:
+    """Build MEND-Net model from configuration.
     
     Args:
         config: Configuration dictionary.
         disabled_modules: List of module names to disable (for ablation).
-            Options: ["HD-NAS", "HKD", "DFC"]
+            Options: ["EA-NAS", "HKD", "DFC"]
         
     Returns:
-        Configured HEALNet model.
+        Configured MENDNet model.
     """
     if disabled_modules is None:
         disabled_modules = []
     
     data_cfg = config.get("data", {})
-    nas_cfg = config.get("hd_nas", {})
+    nas_cfg = config.get("ea_nas", {})
     hkd_cfg = config.get("hkd", {})
     dfc_cfg = config.get("dfc", {})
     
-    model = HEALNet(
+    model = MENDNet(
         num_classes=data_cfg.get("num_classes", 5),
         img_dim=128,
         ehr_dim=64,
@@ -35,7 +35,7 @@ def build_model(config: dict, disabled_modules: list = None) -> HEALNet:
         pretrained=data_cfg.get("pretrained", True),
     )
     
-    if "HD-NAS" in disabled_modules:
+    if "EA-NAS" in disabled_modules:
         _disable_nas(model)
     if "HKD" in disabled_modules:
         _disable_hkd(model)
@@ -65,15 +65,15 @@ def build_teacher(config: dict) -> TeacherModel:
     )
 
 
-def _disable_nas(model: HEALNet) -> None:
-    """Disable HD-NAS by freezing the search space weights."""
+def _disable_nas(model: MENDNet) -> None:
+    """Disable EA-NAS by freezing the search space weights."""
     for param in model.search_space.parameters():
         param.requires_grad = False
     model.search_space.eval()
     model.nas_disabled = True
 
 
-def _disable_hkd(model: HEALNet) -> None:
+def _disable_hkd(model: MENDNet) -> None:
     """Disable HKD by freezing the distillation module parameters."""
     for param in model.hkd.parameters():
         param.requires_grad = False
@@ -81,7 +81,7 @@ def _disable_hkd(model: HEALNet) -> None:
     model.hkd_disabled = True
 
 
-def _disable_dfc(model: HEALNet) -> None:
+def _disable_dfc(model: MENDNet) -> None:
     """Disable DFC module."""
     for param in model.dfc.parameters():
         param.requires_grad = False

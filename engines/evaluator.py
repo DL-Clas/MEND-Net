@@ -9,7 +9,7 @@ from utils.metrics import compute_all_metrics, compute_flops
 
 
 class Evaluator:
-    """Evaluation engine for HEAL-Net models.
+    """Evaluation engine for MEND-Net models.
     
     Supports standard evaluation with per-sample recording,
     confidence scoring, and hardware efficiency profiling.

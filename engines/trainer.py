@@ -8,11 +8,11 @@ from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
 
 from utils.early_stopping import EarlyStopping
-from losses import HEALNetLoss
+from losses import MENDNetLoss
 
 
 class Trainer:
-    """Stage-aware training engine for HEAL-Net.
+    """Stage-aware training engine for MEND-Net.
 
     Supports the three-stage progressive pipeline described in the paper:
     - search:       alternating weight / architecture optimization with a
@@ -24,14 +24,14 @@ class Trainer:
                     distillation.
 
     Args:
-        model: HEALNet model to train.
+        model: MENDNet model to train.
         train_loader: Training data loader.
         val_loader: Validation data loader.
         config: Configuration dictionary.
         recorder: Optional ExperimentRecorder instance.
         stage: Training stage ('search', 'distill', 'compensate').
         teacher: Optional teacher model (required for distillation).
-        loss_fn: Optional HEALNetLoss instance; built from config if None.
+        loss_fn: Optional MENDNetLoss instance; built from config if None.
     """
 
     def __init__(
@@ -61,9 +61,9 @@ class Trainer:
 
         if loss_fn is None:
             hkd_cfg = config.get("hkd", {})
-            nas_cfg = config.get("hd_nas", {})
+            nas_cfg = config.get("ea_nas", {})
             dfc_cfg = config.get("dfc", {})
-            loss_fn = HEALNetLoss(
+            loss_fn = MENDNetLoss(
                 gamma=hkd_cfg.get("gamma", 1.0),
                 beta=hkd_cfg.get("beta", 0.5),
                 lambda_flops=nas_cfg.get("lambda_flops", 0.05),
@@ -74,7 +74,7 @@ class Trainer:
         self.loss_fn = loss_fn.to(self.device)
 
         train_cfg = config.get("training", {})
-        nas_cfg = config.get("hd_nas", {})
+        nas_cfg = config.get("ea_nas", {})
         self.epochs = train_cfg.get("epochs", 200)
         self.grad_clip = train_cfg.get("gradient_clip_norm", 1.0)
         self.amp_enabled = train_cfg.get("amp", True)
@@ -106,7 +106,7 @@ class Trainer:
         )
 
         if self.is_search:
-            nas_cfg = config.get("hd_nas", {})
+            nas_cfg = config.get("ea_nas", {})
             self.arch_optimizer = optim.AdamW(
                 [self.model.search_space.arch_params],
                 lr=nas_cfg.get("arch_lr", 0.0003),
@@ -124,7 +124,7 @@ class Trainer:
         os.makedirs(save_dir, exist_ok=True)
         self.early_stopping = EarlyStopping(
             patience=train_cfg.get("early_stopping_patience", 20),
-            path=os.path.join(save_dir, "heal_net_best.pth"),
+            path=os.path.join(save_dir, "mend_net_best.pth"),
         )
 
         self.best_metric = 0.0
@@ -264,7 +264,7 @@ class Trainer:
                 eta_min=self.config.get("training", {}).get("min_lr", 1e-6),
             )
             if self.arch_optimizer is not None:
-                nas_cfg = self.config.get("hd_nas", {})
+                nas_cfg = self.config.get("ea_nas", {})
                 self.arch_scheduler = CosineAnnealingLR(
                     self.arch_optimizer,
                     T_max=max(self.epochs, 1),

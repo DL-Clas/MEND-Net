@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class ProjectionHead(nn.Module):
     """Non-linear projection to unified metric space.
     
-    Implements Eq.9-10 from HEAL-Net paper:
+    Implements Eq.9-10 from MEND-Net paper:
     F_tilde = sigma(W * F + b)
     
     Args:
@@ -31,7 +31,7 @@ class CrossCovarianceAligner(nn.Module):
     Computes cross-modal covariance matrices for teacher and student,
     then aligns them via Frobenius norm.
     
-    Implements Eq.11-12 from HEAL-Net paper:
+    Implements Eq.11-12 from MEND-Net paper:
     C^T = (1/(B-1)) * sum(F_img^T - mu_img) * (F_ehr^T - mu_ehr)^T
     L_Relation = (1/d_h^2) * ||C^T - C^S||_F^2
     """
@@ -86,7 +86,7 @@ class HKDModule(nn.Module):
     2. KL divergence soft label distillation (L_KL)
     3. Cross-entropy classification loss (L_CE)
     
-    Implements Eq.13-14 from HEAL-Net paper:
+    Implements Eq.13-14 from MEND-Net paper:
     L_Distill = L_CE + gamma * L_Relation + beta * L_KL
     """
     

@@ -1,4 +1,4 @@
-# HEAL-Net Configuration
+# MEND-Net Configuration
 # Target: KBS / ESWA / IEEE Trans
 # Task: Multimodal Medical Image Classification (5 classes)
 
@@ -45,8 +45,8 @@ training:
   amp: true
   gradient_clip_norm: 1.0
 
-# HD-NAS
-hd_nas:
+# EA-NAS
+ea_nas:
   num_nodes: 4
   search_space:
     operators:
@@ -90,7 +90,7 @@ experiment:
 ablation:
   enabled: false
   innovation_names:
-    - "HD-NAS"
+    - "EA-NAS"
     - "HKD"
     - "DFC"
 

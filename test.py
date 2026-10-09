@@ -20,7 +20,7 @@ os.chdir(_SCRIPT_DIR)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="HEAL-Net Evaluation")
+    parser = argparse.ArgumentParser(description="MEND-Net Evaluation")
     parser.add_argument("--config", type=str, default="configs/config.yaml")
     parser.add_argument("--model_path", type=str, required=True,
                         help="Path to trained model checkpoint")

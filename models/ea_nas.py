@@ -123,7 +123,7 @@ OPERATIONS = {
 class MixedOp(nn.Module):
     """Mixed operation: weighted combination of candidate ops.
     
-    Implements Eq.1-2 from HEAL-Net paper:
+    Implements Eq.1-2 from MEND-Net paper:
     f_{i,j}(x_i) = sum_o softmax(alpha_{i,j}^o) * o(x_i)
     """
     def __init__(self, in_channels: int, out_channels: int, op_names: list):
@@ -164,7 +164,7 @@ class MixedOp(nn.Module):
 
 
 class DifferentiableSearchSpace(nn.Module):
-    """Continuous search space for HD-NAS.
+    """Continuous search space for EA-NAS.
     
     Constructs a DAG with mixed operations on each edge.
     Architecture parameters alpha control operation selection.
@@ -309,7 +309,7 @@ class DifferentiableSearchSpace(nn.Module):
         Implements Eq.5 from the paper:
         FLOPs(alpha) = sum_{i<j} sum_o softmax(alpha^o_{i,j}) * FLOPs(o)
         The result is a differentiable function of the architecture
-        parameters, providing a hardware penalty gradient to alpha.
+        parameters, providing a computational cost penalty gradient to alpha.
         
         Args:
             input_size: Spatial feature map size fed into the search space.
@@ -342,10 +342,10 @@ class DifferentiableSearchSpace(nn.Module):
         return float(self.expected_flops(input_size).detach().item())
 
 
-class HardwareAwareLoss(nn.Module):
-    """Hardware-aware loss with FLOPs penalty.
+class EfficiencyAwareLoss(nn.Module):
+    """Efficiency-aware loss with FLOPs penalty.
     
-    Implements Eq.3-6 from HEAL-Net paper:
+    Implements Eq.3-6 from MEND-Net paper:
     L_NAS = L_CE + lambda * log(FLOPs(alpha))
     """
     def __init__(self, lambda_flops: float = 0.05, target_flops: float = 2.5e9):
@@ -358,14 +358,14 @@ class HardwareAwareLoss(nn.Module):
         ce_loss: torch.Tensor,
         current_flops: float,
     ) -> torch.Tensor:
-        """Compute hardware-aware loss.
+        """Compute efficiency-aware loss.
         
         Args:
             ce_loss: Cross-entropy loss tensor.
             current_flops: Current architecture FLOPs estimate.
             
         Returns:
-            Combined loss with hardware penalty.
+            Combined loss with computational cost penalty.
         """
         if current_flops <= 0:
             current_flops = 1.0

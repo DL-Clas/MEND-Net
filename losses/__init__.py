@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class HEALNetLoss(nn.Module):
-    """Joint loss function for HEAL-Net.
+class MENDNetLoss(nn.Module):
+    """Joint loss function for MEND-Net.
     
     Implements Eq.22 from the paper:
     L_Total = L_Distill + lambda * log(FLOPs(alpha)) + rho * L_Recon
@@ -55,11 +55,11 @@ class HEALNetLoss(nn.Module):
         ce_loss: torch.Tensor,
         current_flops: torch.Tensor,
     ) -> torch.Tensor:
-        """Hardware-aware NAS loss (Eq.6).
+        """Efficiency-aware NAS loss (Eq.6).
         
         L_NAS = L_CE + lambda * log(FLOPs(alpha))
         The FLOPs term is differentiable with respect to the architecture
-        parameters, providing the hardware penalty gradient to alpha.
+        parameters, providing the computational cost penalty gradient to alpha.
         When a target_flops budget is configured the term is normalized
         to log(FLOPs(alpha) / FLOPs_target).
         
@@ -68,7 +68,7 @@ class HEALNetLoss(nn.Module):
             current_flops: Differentiable expected FLOPs tensor.
             
         Returns:
-            Combined loss with hardware penalty.
+            Combined loss with computational cost penalty.
         """
         flops = torch.clamp(current_flops, min=1.0)
         if self.target_flops:
@@ -112,7 +112,7 @@ class HEALNetLoss(nn.Module):
         """Compute the stage-specific joint loss.
         
         Args:
-            model: HEALNet student model.
+            model: MENDNet student model.
             teacher: Optional teacher model (required for distillation).
             batch: Batch dict with 'image', 'ehr', 'label',
                 'ehr_mask' and 'img_mask'.

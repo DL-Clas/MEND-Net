@@ -9,17 +9,17 @@
 ![Framework Diagram.](data/arc.png)
 Traditional multimodal medical diagnosis models rely on large network architectures, leading to high computational complexity that prevents deployment on resource-constrained edge devices. Moreover, these models often fail when encountering modality missing in real-world clinical environments.
 
-**HEAL-Net** addresses these challenges with three core innovations:
+**MEND-Net** addresses these challenges with three core innovations:
 
 | Module | Full Name | Role |
 |--------|-----------|------|
-| **EA-NAS** | Hardware-aware Differentiable Neural Architecture Search | Evolves optimal lightweight fusion topology with hardware penalty |
+| **EA-NAS** | Efficiency-aware Differentiable Neural Architecture Search | Evolves optimal lightweight fusion topology with computational cost penalty |
 | **HKD** | Hierarchical Knowledge Distillation | Transfers cross-modal covariance knowledge from teacher to student |
 | **DFC** | Dynamic Feature Compensation | Reconstructs missing modality features via lightweight generator |
 
 **Key Results (MIMIC Dataset):**
 
-| Metric | HEAL-Net | Best Baseline | Improvement |
+| Metric | MEND-Net | Best Baseline | Improvement |
 |--------|----------|---------------|-------------|
 | Accuracy | **89.85% +/- 0.28** | 87.3% +/- 0.38 | +2.55% |
 | Parameters | **8.8M** | 86.4M | **~10x smaller** |
@@ -39,11 +39,11 @@ Traditional multimodal medical diagnosis models rely on large network architectu
 **Installation:**
 
 ```bash
-git clone https://github.com/your-username/HEAL-Net.git
-cd HEAL-Net
+git clone https://github.com/DL-Clas/MEND-Net.git
+cd MEND-Net
 
-conda create -n healnet python=3.9 -y
-conda activate healnet
+conda create -n mendnet python=3.9 -y
+conda activate mendnet
 
 conda install pytorch==2.0.1 torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 pip install -r requirements.txt
@@ -102,7 +102,7 @@ python run.py --mode train --stage all --config configs/config.yaml
 
 ### Step-by-Step Training
 
-#### Stage 1: Architecture Search (HD-NAS)
+#### Stage 1: Architecture Search (EA-NAS)
 
 ```bash
 python run.py --mode train --stage search --config configs/config.yaml
@@ -144,7 +144,7 @@ python run.py --mode train --stage compensate
 ### Standard Evaluation
 
 ```bash
-python test.py --model_path ./weights/heal_net_compensate.pth --config configs/config.yaml
+python test.py --model_path ./weights/mend_net_compensate.pth --config configs/config.yaml
 ```
 
 **Outputs:**
@@ -154,7 +154,7 @@ python test.py --model_path ./weights/heal_net_compensate.pth --config configs/c
 ### Efficiency Profiling
 
 ```bash
-python efficiency_eval.py --config configs/config.yaml --model_path ./weights/heal_net_compensate.pth
+python efficiency_eval.py --config configs/config.yaml --model_path ./weights/mend_net_compensate.pth
 ```
 
 **Outputs:**
@@ -242,10 +242,10 @@ MEND-Net/
 +-- efficiency_eval.py                 # Hardware efficiency profiling
 +-- models/
 |   +-- __init__.py
-|   +-- hd_nas.py                      # HD-NAS: hardware-aware architecture search
+|   +-- ea_nas.py                      # EA-NAS: efficiency-aware architecture search
 |   +-- hkd_module.py                  # HKD: cross-modal knowledge distillation
 |   +-- dfc.py                         # DFC: dynamic feature compensation
-|   +-- heal_net.py                    # HEAL-Net complete model
+|   +-- mend_net.py                    # MEND-Net complete model
 |   +-- teacher_model.py               # Teacher model (ViT-B/32 + TabNet)
 |   +-- builder.py                     # Model factory function
 +-- data/
@@ -280,10 +280,10 @@ MEND-Net/
 | `run.py` | Pipeline orchestrator with --stage and --mode arguments |
 | `test.py` | Model evaluation with metrics and efficiency |
 | `efficiency_eval.py` | Hardware efficiency profiling (params, FLOPs, latency) |
-| `models/hd_nas.py` | Differentiable search space with mixed operations |
+| `models/ea_nas.py` | Differentiable search space with mixed operations |
 | `models/hkd_module.py` | Cross-modal covariance alignment + KL distillation |
 | `models/dfc.py` | SNR masking + cross-modal generator + gated fusion |
-| `models/heal_net.py` | Complete HEAL-Net integrating all three modules |
+| `models/mend_net.py` | Complete MEND-Net integrating all three modules |
 | `models/teacher_model.py` | Teacher model: ViT-B/32 + TabNet + fusion |
 | `models/builder.py` | Model factory with ablation support |
 | `losses/__init__.py` | Joint loss: L_Distill + lambda*log(FLOPs) + rho*L_Recon |
@@ -299,14 +299,14 @@ If you use this code, please cite:
 ```bibtex
 @article{mendnet2026,
   title={Architecture Search and Cross-Modal Distillation for Self-Repairing Lightweight Multimodal Medical Diagnosis},
-  author={},
+  author={Feng, Xitong and Yu, Xiuli and Liu, Yong and Xia, Muhan and Li, Junyi},
   year={2026}
 }
 ```
 
 ## License
 
-This project is released for academic research use.
+This project is released under the MIT License (see the LICENSE file).
 
 ## Contact
 

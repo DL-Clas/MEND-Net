@@ -95,7 +95,7 @@ def estimate_flops(model: torch.nn.Module) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="HEAL-Net Efficiency Evaluation")
+    parser = argparse.ArgumentParser(description="MEND-Net Efficiency Evaluation")
     parser.add_argument("--config", type=str, default="configs/config.yaml")
     parser.add_argument("--model_path", type=str, default=None)
     parser.add_argument("--n_runs", type=int, default=100)
@@ -119,7 +119,7 @@ def main():
     model.to(device)
     
     print(f"\n{'='*60}")
-    print("HEAL-Net Efficiency Evaluation")
+    print("MEND-Net Efficiency Evaluation")
     print(f"{'='*60}")
     print(f"Device: {device}")
     

@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class SNRMaskGenerator(nn.Module):
     """Compute SNR-based binary mask for modality availability.
     
-    Implements Eq.15-16 from HEAL-Net paper:
+    Implements Eq.15-16 from MEND-Net paper:
     M_m = I(SNR(X_m) > tau)
     
     Args:
@@ -52,7 +52,7 @@ class SNRMaskGenerator(nn.Module):
 class CrossModalGenerator(nn.Module):
     """Lightweight cross-modal feature generator.
     
-    Implements Eq.17-18 from HEAL-Net paper:
+    Implements Eq.17-18 from MEND-Net paper:
     Z_c = MLP_c([F_img || F_ehr || M])
     F_bar_m = G_theta(Z_c) * (1 - M_m)
     
@@ -111,7 +111,7 @@ class CrossModalGenerator(nn.Module):
 class GatedFusion(nn.Module):
     """Adaptive gating fusion for observed and reconstructed features.
     
-    Implements Eq.20-21 from HEAL-Net paper:
+    Implements Eq.20-21 from MEND-Net paper:
     g = sigma(W_g * (F_hat + F_bar) + b_g)
     F_comp = g * F_hat + (1 - g) * F_bar
     """

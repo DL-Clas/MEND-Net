@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 
-from .hd_nas import DifferentiableSearchSpace
+from .ea_nas import DifferentiableSearchSpace
 from .hkd_module import HKDModule
 from .dfc import DynamicFeatureCompensation
 
@@ -67,11 +67,11 @@ class ClassifierHead(nn.Module):
         return self.fc(x)
 
 
-class HEALNet(nn.Module):
-    """HEAL-Net: Hierarchical Knowledge Distillation and NAS Framework.
+class MENDNet(nn.Module):
+    """MEND-Net: Hierarchical Knowledge Distillation and NAS Framework.
     
     Complete model integrating:
-    1. HD-NAS: Hardware-aware Differentiable Architecture Search
+    1. EA-NAS: Efficiency-aware Differentiable Architecture Search
     2. HKD: Hierarchical Knowledge Distillation
     3. DFC: Dynamic Feature Compensation
     
@@ -81,7 +81,7 @@ class HEALNet(nn.Module):
         ehr_dim: EHR feature dimension.
         ehr_input_dim: Raw EHR input dimension.
         num_nodes: NAS search space nodes.
-        lambda_flops: Hardware penalty weight.
+        lambda_flops: Computational cost penalty weight.
         snr_threshold: DFC SNR threshold.
         gamma: HKD relation loss weight.
         beta: HKD KL loss weight.

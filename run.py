@@ -12,7 +12,7 @@ from data.synthetic import create_synthetic_dataset
 from models import build_model, build_teacher
 from engines.trainer import Trainer
 from engines.evaluator import Evaluator
-from losses import HEALNetLoss
+from losses import MENDNetLoss
 from utils.reproducibility import set_seed
 from utils.config import load_config
 from utils.experiment_recorder import ExperimentRecorder
@@ -26,7 +26,7 @@ TASK_PRIMARY_METRIC = {
     "detection": "map",
 }
 
-MODULE_NAMES = ["HD-NAS", "HKD", "DFC"]
+MODULE_NAMES = ["EA-NAS", "HKD", "DFC"]
 
 
 def train(config: dict, teacher_path: str = None, stage: str = "all") -> None:
@@ -113,16 +113,16 @@ def train(config: dict, teacher_path: str = None, stage: str = "all") -> None:
             prev_name = "search" if current_stage == "distill" else "distill"
             prev_checkpoint = os.path.join(
                 config.get("experiment", {}).get("save_dir", "./weights"),
-                f"heal_net_{prev_name}.pth",
+                f"mend_net_{prev_name}.pth",
             )
         if prev_checkpoint and os.path.exists(prev_checkpoint):
             model.load_state_dict(torch.load(prev_checkpoint, map_location=device))
             print(f"Loaded weights from previous stage: {prev_checkpoint}")
         
         hkd_cfg = config.get("hkd", {})
-        nas_cfg = config.get("hd_nas", {})
+        nas_cfg = config.get("ea_nas", {})
         
-        loss_fn = HEALNetLoss(
+        loss_fn = MENDNetLoss(
             gamma=hkd_cfg.get("gamma", 1.0),
             beta=hkd_cfg.get("beta", 0.5),
             lambda_flops=nas_cfg.get("lambda_flops", 0.05),
@@ -152,7 +152,7 @@ def train(config: dict, teacher_path: str = None, stage: str = "all") -> None:
         
         save_dir = config.get("experiment", {}).get("save_dir", "./weights")
         os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, f"heal_net_{current_stage}.pth")
+        save_path = os.path.join(save_dir, f"mend_net_{current_stage}.pth")
         torch.save(model.state_dict(), save_path)
         prev_checkpoint = save_path
         print(f"Saved {current_stage} model to {save_path}")
@@ -214,7 +214,7 @@ def run_ablation(
     """Run leave-one-out ablation for all innovation modules.
 
     For each random seed, trains the full model and three variants that
-    remove exactly one module (HD-NAS / HKD / DFC), then evaluates every
+    remove exactly one module (EA-NAS / HKD / DFC), then evaluates every
     variant under both complete input and 50% EHR-missing conditions.
     This mirrors the full-vs-V4/V5/V6 contrasts reported in the paper.
 
@@ -282,7 +282,7 @@ def run_ablation(
         
         combos = {
             "full": None,
-            "w/o HD-NAS": ["HD-NAS"],
+            "w/o EA-NAS": ["EA-NAS"],
             "w/o HKD": ["HKD"],
             "w/o DFC": ["DFC"],
         }
@@ -310,7 +310,7 @@ def run_ablation(
         full_scores["missing"].append(trained["full"]["missing"])
         
         without_map = {
-            "HD-NAS": "w/o HD-NAS",
+            "EA-NAS": "w/o EA-NAS",
             "HKD": "w/o HKD",
             "DFC": "w/o DFC",
         }
@@ -357,7 +357,7 @@ def run_ablation(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="HEAL-Net: Hierarchical Knowledge Distillation and NAS Framework"
+        description="MEND-Net: Hierarchical Knowledge Distillation and NAS Framework"
     )
     parser.add_argument(
         "--mode", type=str, choices=["train", "test", "ablation"],
@@ -396,7 +396,7 @@ def main():
     elif args.mode == "test":
         if args.model_path is None:
             save_dir = config.get("experiment", {}).get("save_dir", "./weights")
-            args.model_path = os.path.join(save_dir, "heal_net_compensate.pth")
+            args.model_path = os.path.join(save_dir, "mend_net_compensate.pth")
         test(config, args.model_path)
     elif args.mode == "ablation":
         num_seeds = args.num_seeds or config.get("experiment", {}).get("num_seeds", 5)
